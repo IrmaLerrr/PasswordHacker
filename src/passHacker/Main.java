@@ -19,13 +19,13 @@ public class Main {
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream())
 
         ) {
-            System.out.println(findPassword(input, output));
+            findPassword(input, output);
         } catch (IOException e) {
             System.out.println("Unable to connect server!");
         }
     }
 
-    public static String findPassword(DataInputStream input, DataOutputStream output) throws IOException {
+    public static void findPassword(DataInputStream input, DataOutputStream output) throws IOException {
         Queue<String> queue = new LinkedList<>();
         queue.add("");
 
@@ -36,18 +36,19 @@ public class Main {
                 String pass = current + c;
                 output.writeUTF(pass);
                 String msgIn = input.readUTF();
+                System.out.print("\033[2K\rChecking pass :" + pass + ". Result: " + msgIn);
 
                 if (msgIn.equals("Connection success!")) {
-                    return pass;
+                    return;
                 }
-                if (msgIn.equals("Too many attempts")) {
-                    return "Error!";
-                }
+//                if (msgIn.equals("Too many attempts")) {
+//                    return "Error!";
+//                }
 
                 queue.add(pass);
             }
         }
 
-        return "Error!";
+//        return "Error!";
     }
 }
