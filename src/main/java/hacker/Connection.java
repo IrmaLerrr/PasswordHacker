@@ -21,9 +21,9 @@ public class Connection {
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream())
 
         ) {
-
-            PassHacker passHacker = new PassHacker(input, output);
-            passHacker.dictionaryBasedBruteForce();
+            RequestManager requestManager = new RequestManager(input, output);
+            PassHacker passHacker = new PassHacker(requestManager);
+            passHacker.start();
 
         } catch (
                 IOException e) {

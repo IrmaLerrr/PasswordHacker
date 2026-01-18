@@ -7,24 +7,28 @@ import java.util.Random;
 
 public class Main {
     private static final int SERVER_PORT = 23456;
-    private static final char[] allChars = "abcdefghijklmnopqrstuvwxyz01234567890".toCharArray();
+    private static final char[] allChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890".toCharArray();
+    private static final Random random = new Random();
 
     public static void main(String[] args) {
         try (ServerSocket server = new ServerSocket(SERVER_PORT)) {
             System.out.println("Server started!");
-            String pass = generateDictionaryBasedPass();
+            String login = generateDictionaryBasedLogin();
+            String pass = generatePass(random.nextInt(10) + 5);
+            System.out.println("Correct login: " + login);
             System.out.println("Correct password: " + pass);
             while (true) {
-                try {
-                    Socket clientSocket = server.accept();
+                try (Socket clientSocket = server.accept()) {
+                    System.out.println("Client connected!");
+
                     DataInputStream input = new DataInputStream(clientSocket.getInputStream());
                     DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
+                    RequestManager requestManager = new RequestManager(input, output);
 
                     while (true) {
-                        String msgIn = input.readUTF();
-                        if (msgIn.equals(pass)) output.writeUTF("Connection success!");
-                        else output.writeUTF("Wrong password!");
+                        requestManager.acceptRequest(login, pass);
                     }
+
                 } catch (EOFException e2) {
                     System.out.println("The client disconnected.");
                 } catch (SocketException e3) {
@@ -38,28 +42,32 @@ public class Main {
         }
     }
 
-    @Deprecated
-    private static String generateSimplePass() {
-        Random random = new Random();
-        StringBuilder password = new StringBuilder(4);
-
-        for (int i = 0; i < 4; i++) {
+    private static String generatePass(int length) {
+        StringBuilder password = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
             password.append(allChars[random.nextInt(allChars.length)]);
         }
 
         return password.toString();
     }
 
+    @Deprecated
     private static String generateDictionaryBasedPass() {
-        Random random = new Random();
-        List<String> passList = FileManager.getPassList();
-        String pass = passList.get(random.nextInt(passList.size()));
-        pass = pass.chars()
+        return diversifyRegister(FileManager.getPassList());
+    }
+
+    private static String generateDictionaryBasedLogin() {
+        return diversifyRegister(FileManager.getLoginList());
+    }
+
+    private static String diversifyRegister(List<String> list) {
+        String word = list.get(random.nextInt(list.size()));
+        word = word.chars()
                 .mapToObj(c -> (char) c)
                 .map(c -> random.nextBoolean() ? Character.toUpperCase(c) : Character.toLowerCase(c))
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
 
-        return pass;
+        return word;
     }
 }

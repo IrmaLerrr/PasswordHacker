@@ -1,6 +1,8 @@
 package hacker;
 
 import com.google.gson.Gson;
+import model.AuthRequest;
+import model.AuthResponse;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -33,7 +35,7 @@ public class RequestManager {
             output.writeUTF(msgIn);
             String msgOut = input.readUTF();
             AuthResponse authResponse =  gson.fromJson(msgOut, AuthResponse.class);
-            return authResponse.getResult();
+            return authResponse.result();
 
         } catch (IOException e) {
             System.out.println("Error while executing request");

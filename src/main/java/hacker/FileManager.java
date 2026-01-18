@@ -7,10 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileManager {
-    private static final String FILE_PATH = "./src/main/resources/passwords.txt";
+    private static final String FILE_PATH_PASS = "./src/main/resources/passwords.txt";
+    private static final String FILE_PATH_LOGIN = "./src/main/resources/logins.txt";
 
     public static List<String> getPassList(){
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+        return readFile(FILE_PATH_PASS);
+    }
+    public static List<String> getLoginList(){
+        return readFile(FILE_PATH_LOGIN);
+    }
+    public static List<String> readFile(String path){
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line;
             List<String> list = new ArrayList<>();
 
@@ -25,4 +32,3 @@ public class FileManager {
         return new ArrayList<>();
     }
 }
-
