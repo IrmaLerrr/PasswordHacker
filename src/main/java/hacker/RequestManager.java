@@ -32,9 +32,13 @@ public class RequestManager {
         AuthRequest authRequest = new AuthRequest(login, password);
         String msgIn = gson.toJson(authRequest);
         try {
+            long startTime = System.currentTimeMillis();
             output.writeUTF(msgIn);
             String msgOut = input.readUTF();
+            long endTime = System.currentTimeMillis();
             AuthResponse authResponse =  gson.fromJson(msgOut, AuthResponse.class);
+            long responseTime = endTime - startTime;
+            if (responseTime > 100) return "Exception happened during login";
             return authResponse.result();
 
         } catch (IOException e) {

@@ -33,7 +33,7 @@ public class Main {
                     System.out.println("The client disconnected.");
                 } catch (SocketException e3) {
                     System.out.println("The connection was broken.");
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     System.out.println("Error! " + e.getMessage());
                 }
             }

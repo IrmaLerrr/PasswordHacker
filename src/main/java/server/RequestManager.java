@@ -27,7 +27,7 @@ public class RequestManager {
         else output.writeUTF("Wrong password!");
     }
 
-    public void acceptRequest(String corrrectLogin, String correctPassword) throws IOException {
+    public void acceptRequest(String corrrectLogin, String correctPassword) throws IOException, InterruptedException {
         String msgOut = input.readUTF();
         AuthRequest authRequest;
         try {
@@ -44,7 +44,9 @@ public class RequestManager {
         } else if (Objects.equals(correctPassword, password)) {
             output.writeUTF(gson.toJson(new AuthResponse("Connection success!")));
         } else if (correctPassword.startsWith(password)) {
-            output.writeUTF(gson.toJson(new AuthResponse("Exception happened during login")));
+            Thread.sleep(100);
+            output.writeUTF(gson.toJson(new AuthResponse("Wrong password!")));
+//            output.writeUTF(gson.toJson(new AuthResponse("Exception happened during login")));
         } else {
             output.writeUTF(gson.toJson(new AuthResponse("Wrong password!")));
         }
