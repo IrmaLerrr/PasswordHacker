@@ -1,6 +1,7 @@
 # PasswordHacker
 
 A client-server application demonstrating brute-force password cracking. The server generates login using dictionary and a random password and validates authentication attempts, while the client ("hacker") attempts to guess the password using a dictionary attack and brute force.
+This project was completed as part of the [Hyperskill](https://hyperskill.org/projects/329) educational project.
 
 ![Java](https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk)
 ![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
